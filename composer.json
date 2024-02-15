@@ -1,0 +1,5 @@
+{
+    "require": {
+        "gpslab/sitemap": "^2.0"
+    }
+}

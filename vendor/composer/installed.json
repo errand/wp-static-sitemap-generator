@@ -1,0 +1,55 @@
+{
+    "packages": [
+        {
+            "name": "gpslab/sitemap",
+            "version": "v2.0.1",
+            "version_normalized": "2.0.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/gpslab/sitemap.git",
+                "reference": "aecd4912891ed19603f8630e8ed5bb89f108d6db"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/gpslab/sitemap/zipball/aecd4912891ed19603f8630e8ed5bb89f108d6db",
+                "reference": "aecd4912891ed19603f8630e8ed5bb89f108d6db",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": ">=7.1.0"
+            },
+            "require-dev": {
+                "ext-xmlwriter": "*",
+                "ext-zlib": "*",
+                "phpunit/phpunit": "~7.5",
+                "psr/log": "~1.0"
+            },
+            "suggest": {
+                "ext-xmlwriter": "Allow use XMLWriter for render sitemap.xml",
+                "ext-zlib": "Allow use compression for sitemap.xml"
+            },
+            "time": "2021-05-14T11:28:02+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "GpsLab\\Component\\Sitemap\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "sitemap.xml builder",
+            "homepage": "https://github.com/gpslab/sitemap",
+            "support": {
+                "issues": "https://github.com/gpslab/sitemap/issues",
+                "source": "https://github.com/gpslab/sitemap/tree/v2.0.1"
+            },
+            "install-path": "../gpslab/sitemap"
+        }
+    ],
+    "dev": true,
+    "dev-package-names": []
+}
