@@ -7,5 +7,5 @@ function static_sitemap_dashboard(){
 }
 
 function static_sitemap_dashboard_page(){
-    include( WP_PLUGIN_DIR.'/'.plugin_dir_path(STATIC_SITEMAP_BASENAME) . 'views/dashboard.php');
+    include( WP_PLUGIN_DIR.'/'.plugin_dir_path(WP_STATIC_SITEMAP_GENERATOR_BASENAME) . 'views/dashboard.php');
 }
