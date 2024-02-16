@@ -101,7 +101,9 @@ function wpssg_cron_exec() {
     wpssg_generator_run();
 }
 
-WP_CLI::add_command( 'wpssg_generate', 'wpssg_generator_run' );
+if ( class_exists( 'WP_CLI' ) ) {
+    WP_CLI::add_command('wpssg_generate', 'wpssg_generator_run');
+}
 
 //add_action( 'publish_post', 'wp_static_sitemap_generate_sitemap', 10, 3 );
 //add_action( 'delete_post', 'wp_static_sitemap_generate_sitemap', 10, 2 );
