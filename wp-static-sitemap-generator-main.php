@@ -50,6 +50,8 @@ function wpssg_generator_run()
         ABSPATH .'xml-sitemap/sitemap%d.xml',
         home_url().'/xml-sitemap/sitemap%d.xml'
     );
+
+    WP_CLI::success( 'Thank you for running the sample command.' );
 }
 
 add_action( 'wp_ajax_wpssg_ajax_generate', 'wpssg_ajax_generate' );
@@ -98,6 +100,8 @@ add_action( 'wpssg_cron_hook', 'wpssg_cron_exec' );
 function wpssg_cron_exec() {
     wpssg_generator_run();
 }
+
+WP_CLI::add_command( 'wpssg_generate', 'wpssg_generator_run' );
 
 //add_action( 'publish_post', 'wp_static_sitemap_generate_sitemap', 10, 3 );
 //add_action( 'delete_post', 'wp_static_sitemap_generate_sitemap', 10, 2 );
