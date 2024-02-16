@@ -1,14 +1,5 @@
 <?php
 
-use GpsLab\Component\Sitemap\Render\PlainTextSitemapIndexRender;
-use GpsLab\Component\Sitemap\Render\PlainTextSitemapRender;
-use GpsLab\Component\Sitemap\Sitemap\Sitemap;
-use GpsLab\Component\Sitemap\Stream\WritingSplitIndexStream;
-use GpsLab\Component\Sitemap\Stream\WritingStream;
-use GpsLab\Component\Sitemap\Url\ChangeFrequency;
-use GpsLab\Component\Sitemap\Url\Url;
-use GpsLab\Component\Sitemap\Writer\TempFileWriter;
-
 if ( ! function_exists( 'add_filter' ) ) {
     header( 'Status: 403 Forbidden' );
     header( 'HTTP/1.1 403 Forbidden' );
@@ -31,7 +22,6 @@ if ( is_readable( $autoload_file ) ) {
 
 function wp_static_sitemap_generator_activate()
 {
-
     _wp_static_sitemap_generator_activate();
 
     // This is done so that the 'uninstall_{$file}' is triggered.
@@ -41,69 +31,73 @@ function wp_static_sitemap_generator_activate()
 function _wp_static_sitemap_generator_activate()
 {
     do_action( 'wp_static_sitemap_generator_activate' );
-    wp_static_sitemap_generate_sitemap();
-}
 
-function wp_static_sitemap_generate_sitemap()
-{
-    $args = array(
-        'post_type' => array('post','page'),
-        'post_status' => 'publish',
-        'posts_per_page' => -1,
-        'ignore_sticky_posts' => true,
-    );
-    $qry = new WP_Query($args);
-
-    $urls = [];
-
-    foreach ($qry->posts as $post) {
-        $url = Url::create(
-            get_permalink($post->ID), // loc
-            new \DateTimeImmutable(date('c', get_post_timestamp($post->ID))), // lastmod
-            ChangeFrequency::always(), // changefreq
-            10 // priority
-        );
-
-        $urls[] = $url;
+    if (!mkdir($concurrentDirectory = ABSPATH . 'xml-sitemap') && !is_dir($concurrentDirectory)) {
+        throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
     }
-
-
-    // file into which we will write a sitemap
-    $index_filename = ABSPATH .'static-sitemap.xml';
-    $part_filename = ABSPATH .'xml-sitemap/sitemap%d.xml';
-    $part_web_path = home_url().'/xml-sitemap/sitemap%d.xml';
-
-    $index_render = new PlainTextSitemapIndexRender();
-    $index_writer = new TempFileWriter();
-
-    $part_render = new PlainTextSitemapRender();
-    $part_writer = new TempFileWriter();
-
-    $stream = new WritingSplitIndexStream(
-        $index_render,
-        $part_render,
-        $index_writer,
-        $part_writer,
-        $index_filename,
-        $part_filename,
-        $part_web_path
-    );
-
-    // build sitemap
-    $stream->open();
-    foreach ($urls as $url) {
-        $stream->push($url);
-    }
-
-    $stream->close();
 }
 
 register_activation_hook( WP_STATIC_SITEMAP_GENERATOR_FILE, 'wp_static_sitemap_generator_activate' );
 
-/*add_action("wp_loaded","wp_static_sitemap_generator_loaded");
-function wp_static_sitemap_generator_loaded(){
-    require_once plugin_dir_path( __FILE__ ) . 'inc/admin.php';
-}*/
+function wpssg_generator_run()
+{
+    require_once plugin_dir_path( __FILE__ ) . 'inc/class-wpssg.php';
 
-add_action( 'publish_post', 'wp_static_sitemap_generate_sitemap', 10, 3 );
-add_action( 'delete_post', 'wp_static_sitemap_generate_sitemap', 10, 2 );
+    $generator = new WPSSG;
+
+    $generator->generate(
+        ABSPATH .'static-sitemap.xml',
+        ABSPATH .'xml-sitemap/sitemap%d.xml',
+        home_url().'/xml-sitemap/sitemap%d.xml'
+    );
+}
+
+add_action( 'wp_ajax_wpssg_ajax_generate', 'wpssg_ajax_generate' );
+
+function wpssg_ajax_generate()
+{
+    $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
+
+    if ( ! wp_verify_nonce( $nonce, 'wpssg-ajax-nonce' ) ) {
+        wp_send_json( array(
+            'status'  => 'error',
+            'title'   => 'Error',
+            'message' => 'Nonce verification failed',
+        ) );
+        wp_die();
+    }
+
+    wpssg_generator_run();
+
+    wp_send_json( array(
+        'status'  => 'success',
+        'title'   => 'Success',
+        'message' => 'Success.',
+    ) );
+    wp_die();
+}
+
+
+/**
+ * Add Admin page
+ */
+add_action("wp_loaded", "wp_static_sitemap_generator_loaded");
+
+function wp_static_sitemap_generator_loaded(){
+    require_once plugin_dir_path( __FILE__ ) . 'inc/class-admin.php';
+}
+
+/**
+ * Add Cron task
+ */
+if ( ! wp_next_scheduled( 'videostats_cron_hook' ) ) {
+    wp_schedule_event( time(), 'daily', 'wpssg_cron_hook' );
+}
+
+add_action( 'wpssg_cron_hook', 'wpssg_cron_exec' );
+function wpssg_cron_exec() {
+    wpssg_generator_run();
+}
+
+//add_action( 'publish_post', 'wp_static_sitemap_generate_sitemap', 10, 3 );
+//add_action( 'delete_post', 'wp_static_sitemap_generate_sitemap', 10, 2 );
