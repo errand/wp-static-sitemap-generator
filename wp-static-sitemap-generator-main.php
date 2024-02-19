@@ -51,7 +51,9 @@ function wpssg_generator_run()
         home_url().'/xml-sitemap/sitemap%d.xml'
     );
 
-    WP_CLI::success( 'Thank you for running the sample command.' );
+    if ( class_exists( 'WP_CLI' ) ) {
+        WP_CLI::success('Thank you for running the sample command.');
+    }
 }
 
 add_action( 'wp_ajax_wpssg_ajax_generate', 'wpssg_ajax_generate' );
@@ -60,7 +62,7 @@ function wpssg_ajax_generate()
 {
     $nonce = isset( $_POST['nonce'] ) ? sanitize_text_field( $_POST['nonce'] ) : '';
 
-    if ( ! wp_verify_nonce( $nonce, 'wpssg-ajax-nonce' ) ) {
+    if ( ! wp_verify_nonce( $nonce, 'wpssg-ajax' ) ) {
         wp_send_json( array(
             'status'  => 'error',
             'title'   => 'Error',

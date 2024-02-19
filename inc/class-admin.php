@@ -22,7 +22,7 @@ class WPSSG_Admin_Page {
             wp_localize_script( 'wpssg', 'WPSSG',
                 array(
                     'ajax_url' => admin_url( 'admin-ajax.php' ),
-                    'nonce'    => wp_create_nonce( 'wpssg' )
+                    'nonce'    => wp_create_nonce( 'wpssg-ajax' )
                 )
             );
         }
