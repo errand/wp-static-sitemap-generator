@@ -4,18 +4,9 @@
  * This plugin is based on https://github.com/gpslab/sitemap
  */
 
-use GpsLab\Component\Sitemap\Render\PlainTextSitemapIndexRender;
-use GpsLab\Component\Sitemap\Render\PlainTextSitemapRender;
-use GpsLab\Component\Sitemap\Sitemap\Sitemap;
-use GpsLab\Component\Sitemap\Stream\WritingIndexStream;
-use GpsLab\Component\Sitemap\Stream\WritingStream;
-use GpsLab\Component\Sitemap\Url\ChangeFrequency;
-use GpsLab\Component\Sitemap\Url\Url;
-use GpsLab\Component\Sitemap\Writer\TempFileWriter;
-
 class WPSSG {
 
-    public function __construct($index_filename, $increment = 500, $sleep = 1)
+    public function __construct($index_filename, $increment = 1000, $sleep = 1)
     {
         $this->posts_count = $this->count_posts();
         $this->increment = $increment;
@@ -28,8 +19,6 @@ class WPSSG {
 
     public function generate()
     {
-        $urls = [];
-
         if( $this->offset > $this->posts_count ) {
 
             $this->writeSourse();
@@ -49,59 +38,80 @@ class WPSSG {
 
             $qry = get_posts($args);
 
-            foreach ($qry as $id) {
-                $url = Url::create(
-                    get_permalink($id), // loc
-                    new \DateTimeImmutable(date('c', get_post_timestamp($id))), // lastmod
-                    ChangeFrequency::always(), // changefreq
-                    10 // priority
-                );
-
-                $urls[] = $url;
-            }
-
             $this->offset += $this->increment;
             $this->iterator += 1;
-            $this->simpleWriter($urls, $this->iterator);
 
-            sleep($this->sleep);
+            $filename = ABSPATH .'/xml-sitemap/sitemap'.$this->iterator.'.xml';
+            $writer = new XMLWriter();
+            $writer->openURI($filename);
+            $writer->startDocument("1.0");
+            $writer->startElement('urlset');
+            $writer->startAttribute('xmlns:xsi');
+            $writer->text('http://www.w3.org/2001/XMLSchema-instance');
+            $writer->endAttribute();
+            $writer->startAttribute('xsi:schemaLocation');
+            $writer->text('http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd');
+            $writer->endAttribute();
+            $writer->startAttribute('xmlns');
+            $writer->text('http://www.sitemaps.org/schemas/sitemap/0.9');
+            $writer->endAttribute();
+
+
+            foreach ($qry as $id) {
+                $writer->startElement('url');
+                $writer->startElement("loc");
+                $writer->text(get_permalink($id));
+                $writer->endElement();
+                $writer->startElement("lastmod");
+                $writer->text(get_the_date('c', $id));
+                $writer->endElement();
+                $writer->startElement("changefreq");
+                $writer->text('monthly');
+                $writer->endElement();
+                $writer->startElement("priority");
+                $writer->text('1');
+                $writer->endElement();
+                $writer->endElement();
+            }
+
+            $writer->endDocument();
+            $writer->flush();
 
             $this->generate();
         }
     }
-
     private function writeSourse()
     {
-        // configure stream
-        $render = new PlainTextSitemapIndexRender();
-        $writer = new TempFileWriter();
-        $stream = new WritingIndexStream($render, $writer, $this->index_filename);
+        $filename = ABSPATH .'static-sitemap.xml';
+        $writer = new XMLWriter();
+        $writer->openURI($filename);
 
-        // build sitemap.xml index
-        $stream->open();
+        $writer->startDocument("1.0");
+        $writer->startElement('sitemapindex');
+        $writer->startAttribute('xmlns:xsi');
+        $writer->text('http://www.w3.org/2001/XMLSchema-instance');
+        $writer->endAttribute();
+        $writer->startAttribute('xsi:schemaLocation');
+        $writer->text('http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd');
+        $writer->endAttribute();
+        $writer->startAttribute('xmlns');
+        $writer->text('http://www.sitemaps.org/schemas/sitemap/0.9');
+        $writer->endAttribute();
+
+
         for($i = 1; $i < $this->iterator; $i++){
-            $stream->pushSitemap(new Sitemap(WP_HOME . '/sitemap'.$i.'.xml', new \DateTimeImmutable('-1 hour')));
-
+            $writer->startElement("sitemap");
+            $writer->startElement("loc");
+            $writer->text(WP_HOME . '/sitemap'.$i.'.xml');
+            $writer->endElement();
+            $writer->startElement("lastmod");
+            $writer->text(date('c'));
+            $writer->endElement();
+            $writer->endElement();
         }
-        $stream->close();
-    }
 
-    private function simpleWriter($urls, $iteration)
-    {
-        // file into which we will write a sitemap
-        $filename = ABSPATH .'/xml-sitemap/sitemap'.$iteration.'.xml';
-
-        // configure stream
-        $render = new PlainTextSitemapRender();
-        $writer = new TempFileWriter();
-        $stream = new WritingStream($render, $writer, $filename);
-
-        // build sitemap.xml
-        $stream->open();
-        foreach ($urls as $url) {
-            $stream->push($url);
-        }
-        $stream->close();
+        $writer->endDocument();
+        $writer->flush();
     }
 
     public function count_posts(): int

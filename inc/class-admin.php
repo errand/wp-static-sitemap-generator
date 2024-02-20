@@ -19,7 +19,7 @@ class WPSSG_Admin_Page {
      * Enqueue admin scripts
      */
     public function wpssg_admin_assets($screen) {
-        if( $screen === 'settings_page_wpssg' ){
+        if( $screen === 'tools_page_wpssg' ){
             wp_enqueue_script( 'wpssg', plugins_url( 'assets/admin.js', __DIR__), array( 'jquery' ), '1.0.0', true );
             wp_localize_script( 'wpssg', 'WPSSG',
                 array(
