@@ -6,7 +6,9 @@
 
 use GpsLab\Component\Sitemap\Render\PlainTextSitemapIndexRender;
 use GpsLab\Component\Sitemap\Render\PlainTextSitemapRender;
+use GpsLab\Component\Sitemap\Stream\WritingIndexStream;
 use GpsLab\Component\Sitemap\Stream\WritingSplitIndexStream;
+use GpsLab\Component\Sitemap\Stream\WritingStream;
 use GpsLab\Component\Sitemap\Url\ChangeFrequency;
 use GpsLab\Component\Sitemap\Url\Url;
 use GpsLab\Component\Sitemap\Writer\TempFileWriter;
@@ -17,6 +19,7 @@ class WPSSG {
     {
         $this->posts_count = $this->count_posts();
         $this->increment = $increment;
+        $this->iterator = 0;
         $this->sleep = $sleep;
         $this->offset = 0;
         $this->urls = [];
@@ -28,6 +31,7 @@ class WPSSG {
 
     public function generate()
     {
+        $urls = [];
         if( $this->offset > $this->posts_count ) {
 
             $this->writeSourse();
@@ -59,10 +63,12 @@ class WPSSG {
                     10 // priority
                 );
 
-                $this->urls[] = $url;
+                $urls[] = $url;
             }
 
             $this->offset += $this->increment;
+            $this->iterator += 1;
+            $this->simpleWriter($urls, $this->iterator);
 
             sleep($this->sleep);
 
@@ -72,28 +78,36 @@ class WPSSG {
 
     public function writeSourse()
     {
-        $index_render = new PlainTextSitemapIndexRender();
-        $index_writer = new TempFileWriter();
 
-        $part_render = new PlainTextSitemapRender();
-        $part_writer = new TempFileWriter();
+        // configure stream
+        $render = new PlainTextSitemapIndexRender();
+        $writer = new TempFileWriter();
+        $stream = new WritingIndexStream($render, $writer, $this->index_filename);
 
-        $stream = new WritingSplitIndexStream(
-            $index_render,
-            $part_render,
-            $index_writer,
-            $part_writer,
-            $this->index_filename,
-            $this->part_filename,
-            $this->part_web_path
-        );
-
-        // build sitemap
+        // build sitemap.xml index
         $stream->open();
-        foreach ($this->urls as $url) {
+        for($i = 0; $i < $this->iterator; $i++){
+            $stream->pushSitemap(new Sitemap(WP_HOME . '/sitemap'.$i.'.xml', new \DateTimeImmutable('-1 hour')));
+
+        }
+        $stream->close();
+    }
+
+    private function simpleWriter($urls, $iteration)
+    {
+        // file into which we will write a sitemap
+        $filename = __DIR__ .'/sitemap'.$iteration.'.xml';
+
+        // configure stream
+        $render = new PlainTextSitemapRender();
+        $writer = new TempFileWriter();
+        $stream = new WritingStream($render, $writer, $filename);
+
+        // build sitemap.xml
+        $stream->open();
+        foreach ($urls as $url) {
             $stream->push($url);
         }
-
         $stream->close();
     }
 
