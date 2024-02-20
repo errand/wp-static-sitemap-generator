@@ -11,7 +11,7 @@
             success(response) {
                 console.log(response);
                 if (response.success) {
-                    //location.reload();
+                    console.log(response);
                 } else {
                     console.log(response);
                 }

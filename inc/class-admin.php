@@ -1,6 +1,8 @@
 <?php
 
-// class to add admin submenu page
+/**
+ * class to add admin submenu page
+ */
 
 class WPSSG_Admin_Page {
 
@@ -33,7 +35,7 @@ class WPSSG_Admin_Page {
      */
     public function wpssg_admin_menu() {
         add_submenu_page(
-            'options-general.php',
+            'tools.php',
             __( 'Static Sitemap Generator', 'wp_static-sitemap_generator' ),
             __( 'Static Sitemap Generator', 'wp_static-sitemap_generator' ),
             'manage_options',

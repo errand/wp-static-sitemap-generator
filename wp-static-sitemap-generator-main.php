@@ -45,10 +45,8 @@ function wpssg_generator_run()
 
     $generator = new WPSSG(
         ABSPATH .'static-sitemap.xml',
-        ABSPATH .'xml-sitemap/sitemap%d.xml',
-        home_url().'/xml-sitemap/sitemap%d.xml',
         1000,
-        1,
+        0,
     );
 
     $generator->generate();
@@ -56,6 +54,9 @@ function wpssg_generator_run()
     if ( class_exists( 'WP_CLI' ) ) {
         WP_CLI::success('Success.');
     }
+
+    wp_send_json_success();
+
 }
 
 add_action( 'wp_ajax_wpssg_ajax_generate', 'wpssg_ajax_generate' );

@@ -6,8 +6,8 @@
 
 use GpsLab\Component\Sitemap\Render\PlainTextSitemapIndexRender;
 use GpsLab\Component\Sitemap\Render\PlainTextSitemapRender;
+use GpsLab\Component\Sitemap\Sitemap\Sitemap;
 use GpsLab\Component\Sitemap\Stream\WritingIndexStream;
-use GpsLab\Component\Sitemap\Stream\WritingSplitIndexStream;
 use GpsLab\Component\Sitemap\Stream\WritingStream;
 use GpsLab\Component\Sitemap\Url\ChangeFrequency;
 use GpsLab\Component\Sitemap\Url\Url;
@@ -15,32 +15,26 @@ use GpsLab\Component\Sitemap\Writer\TempFileWriter;
 
 class WPSSG {
 
-    public function __construct($index_filename, $part_filename, $part_web_path, $increment = 500, $sleep = 1)
+    public function __construct($index_filename, $increment = 500, $sleep = 1)
     {
         $this->posts_count = $this->count_posts();
         $this->increment = $increment;
         $this->iterator = 0;
         $this->sleep = $sleep;
         $this->offset = 0;
-        $this->urls = [];
 
         $this->index_filename = $index_filename;
-        $this->part_filename = $part_filename;
-        $this->part_web_path = $part_web_path;
     }
 
     public function generate()
     {
         $urls = [];
+
         if( $this->offset > $this->posts_count ) {
 
             $this->writeSourse();
 
-            wp_send_json_success( [
-                'offset' => $this->offset,
-                'posts_count' => $this->posts_count,
-                'urls' => $this->urls,
-            ] );
+            wp_send_json_success();
 
         } else {
 
@@ -76,9 +70,8 @@ class WPSSG {
         }
     }
 
-    public function writeSourse()
+    private function writeSourse()
     {
-
         // configure stream
         $render = new PlainTextSitemapIndexRender();
         $writer = new TempFileWriter();
@@ -86,7 +79,7 @@ class WPSSG {
 
         // build sitemap.xml index
         $stream->open();
-        for($i = 0; $i < $this->iterator; $i++){
+        for($i = 1; $i < $this->iterator; $i++){
             $stream->pushSitemap(new Sitemap(WP_HOME . '/sitemap'.$i.'.xml', new \DateTimeImmutable('-1 hour')));
 
         }
@@ -96,7 +89,7 @@ class WPSSG {
     private function simpleWriter($urls, $iteration)
     {
         // file into which we will write a sitemap
-        $filename = __DIR__ .'/sitemap'.$iteration.'.xml';
+        $filename = ABSPATH .'/xml-sitemap/sitemap'.$iteration.'.xml';
 
         // configure stream
         $render = new PlainTextSitemapRender();
