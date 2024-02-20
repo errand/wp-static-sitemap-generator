@@ -13,60 +13,46 @@ use GpsLab\Component\Sitemap\Writer\TempFileWriter;
 
 class WPSSG {
 
-    public function __construct()
+    public function __construct($index_filename, $part_filename, $part_web_path)
     {
         $this->posts_count = $this->count_posts();
+        $this->increment = 1000;
         $this->offset = 0;
         $this->urls = [];
+        $this->index_filename = $index_filename;
+        $this->part_filename = $part_filename;
+        $this->part_web_path = $part_web_path;
     }
 
-    public function generate(
-        $index_filename,
-        $part_filename,
-        $part_web_path)
+    public function generate()
     {
-
         if( $this->offset > $this->posts_count ) {
-            $index_render = new PlainTextSitemapIndexRender();
-            $index_writer = new TempFileWriter();
 
-            $part_render = new PlainTextSitemapRender();
-            $part_writer = new TempFileWriter();
+            $this->writeSourse();
 
-            $stream = new WritingSplitIndexStream(
-                $index_render,
-                $part_render,
-                $index_writer,
-                $part_writer,
-                $index_filename,
-                $part_filename,
-                $part_web_path
-            );
-
-            // build sitemap
-            $stream->open();
-            foreach ($this->urls as $url) {
-                $stream->push($url);
-            }
-
-            $stream->close();
+            wp_send_json_success( [
+                'offset' => $this->offset,
+                'posts_count' => $this->posts_count,
+                'urls' => $this->urls,
+            ] );
 
         } else {
 
             $args = array(
                 'post_type' => array('post','page'),
                 'post_status' => 'publish',
-                'posts_per_page' => $this->offset,
+                'posts_per_page' => $this->increment,
+                'offset' => $this->offset,
                 'ignore_sticky_posts' => true,
                 'fields' => 'ids',
             );
 
             $qry = get_posts($args);
 
-            foreach ($qry->posts as $post) {
+            foreach ($qry as $id) {
                 $url = Url::create(
-                    get_permalink($post->ID), // loc
-                    new \DateTimeImmutable(date('c', get_post_timestamp($post->ID))), // lastmod
+                    get_permalink($id), // loc
+                    new \DateTimeImmutable(date('c', get_post_timestamp($id))), // lastmod
                     ChangeFrequency::always(), // changefreq
                     10 // priority
                 );
@@ -75,10 +61,39 @@ class WPSSG {
             }
 
             $this->offset += 1000;
+
+            $this->generate();
         }
     }
 
-    function count_posts()
+    public function writeSourse()
+    {
+        $index_render = new PlainTextSitemapIndexRender();
+        $index_writer = new TempFileWriter();
+
+        $part_render = new PlainTextSitemapRender();
+        $part_writer = new TempFileWriter();
+
+        $stream = new WritingSplitIndexStream(
+            $index_render,
+            $part_render,
+            $index_writer,
+            $part_writer,
+            $this->index_filename,
+            $this->part_filename,
+            $this->part_web_path
+        );
+
+        // build sitemap
+        $stream->open();
+        foreach ($this->urls as $url) {
+            $stream->push($url);
+        }
+
+        $stream->close();
+    }
+
+    public function count_posts(): int
     {
         $args = array(
             'post_type' => array('post','page'),

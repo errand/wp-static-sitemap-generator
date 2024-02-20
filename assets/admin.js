@@ -10,10 +10,10 @@
 
             success(response) {
                 console.log(response);
-                if (response.status === 'success') {
+                if (response.success) {
                     //location.reload();
                 } else {
-                    alert(response.message);
+                    alert(response);
                 }
             }
         });

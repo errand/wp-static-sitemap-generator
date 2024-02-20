@@ -43,16 +43,16 @@ function wpssg_generator_run()
 {
     require_once plugin_dir_path( __FILE__ ) . 'inc/class-wpssg.php';
 
-    $generator = new WPSSG;
-
-    $generator->generate(
+    $generator = new WPSSG(
         ABSPATH .'static-sitemap.xml',
         ABSPATH .'xml-sitemap/sitemap%d.xml',
         home_url().'/xml-sitemap/sitemap%d.xml'
     );
 
+    $generator->generate();
+
     if ( class_exists( 'WP_CLI' ) ) {
-        WP_CLI::success('Thank you for running the sample command.');
+        WP_CLI::success('Success.');
     }
 }
 
