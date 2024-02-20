@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This plugin is based on https://github.com/gpslab/sitemap
+ * This Class generates static xml sitemap
  */
 
 class WPSSG {
@@ -56,7 +56,6 @@ class WPSSG {
             $writer->text('http://www.sitemaps.org/schemas/sitemap/0.9');
             $writer->endAttribute();
 
-
             foreach ($qry as $id) {
                 $writer->startElement('url');
                 $writer->startElement("loc");
@@ -77,6 +76,7 @@ class WPSSG {
             $writer->endDocument();
             $writer->flush();
 
+            unset($qry, $writer);
             $this->generate();
         }
     }
