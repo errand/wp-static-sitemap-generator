@@ -43,11 +43,7 @@ function wpssg_generator_run()
 {
     require_once plugin_dir_path( __FILE__ ) . 'inc/class-wpssg.php';
 
-    $generator = new WPSSG(
-        ABSPATH .'static-sitemap.xml',
-        1000,
-        0,
-    );
+    $generator = new WPSSG(ABSPATH .'static-sitemap.xml');
 
     $generator->generate();
 
