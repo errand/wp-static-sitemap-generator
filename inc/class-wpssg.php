@@ -13,12 +13,14 @@ use GpsLab\Component\Sitemap\Writer\TempFileWriter;
 
 class WPSSG {
 
-    public function __construct($index_filename, $part_filename, $part_web_path)
+    public function __construct($index_filename, $part_filename, $part_web_path, $increment = 500, $sleep = 1)
     {
         $this->posts_count = $this->count_posts();
-        $this->increment = 1000;
+        $this->increment = $increment;
+        $this->sleep = $sleep;
         $this->offset = 0;
         $this->urls = [];
+
         $this->index_filename = $index_filename;
         $this->part_filename = $part_filename;
         $this->part_web_path = $part_web_path;
@@ -60,7 +62,9 @@ class WPSSG {
                 $this->urls[] = $url;
             }
 
-            $this->offset += 1000;
+            $this->offset += $this->increment;
+
+            sleep($this->sleep);
 
             $this->generate();
         }
@@ -104,6 +108,7 @@ class WPSSG {
         );
 
         $qry = new WP_Query($args);
+
         return $qry->found_posts;
     }
 }

@@ -13,7 +13,7 @@
                 if (response.success) {
                     //location.reload();
                 } else {
-                    alert(response);
+                    console.log(response);
                 }
             }
         });

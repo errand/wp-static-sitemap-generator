@@ -46,7 +46,9 @@ function wpssg_generator_run()
     $generator = new WPSSG(
         ABSPATH .'static-sitemap.xml',
         ABSPATH .'xml-sitemap/sitemap%d.xml',
-        home_url().'/xml-sitemap/sitemap%d.xml'
+        home_url().'/xml-sitemap/sitemap%d.xml',
+        500,
+        1,
     );
 
     $generator->generate();
