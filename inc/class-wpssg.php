@@ -19,7 +19,7 @@ class WPSSG {
         $posts_count = $this->count_posts();
         $increment = 1000;
 
-        for($i = 1; $i <= ceil($posts_count / $increment); $i++) {
+        for($i = 1; $i <= ceil(2001); $i++) {
             $this->writeUrlset($increment, $offset, $i);
             $offset += $increment;
         }
