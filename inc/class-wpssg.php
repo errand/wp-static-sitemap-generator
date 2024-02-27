@@ -16,10 +16,10 @@ class WPSSG {
     public function generate()
     {
         $offset = 0;
-        $posts_count = $this->count_posts();
+        //$posts_count = $this->count_posts();
         $increment = 1000;
 
-        for($i = 1; $i <= ceil(2001); $i++) {
+        for($i = 1; $i <= ceil(3); $i++) {
             $this->writeUrlset($increment, $offset, $i);
             $offset += $increment;
         }
