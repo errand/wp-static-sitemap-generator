@@ -19,7 +19,7 @@ class WPSSG {
         //$posts_count = $this->count_posts();
         $increment = 1000;
 
-        for($i = 1; $i <= ceil(3); $i++) {
+        for($i = 1; $i < 3; $i++) {
             $this->writeUrlset($increment, $offset, $i);
             $offset += $increment;
         }
@@ -100,7 +100,7 @@ class WPSSG {
         $writer->endAttribute();
 
 
-        for($i = 1; $i < $this->iterator; $i++){
+        for($i = 1; $i < 3; $i++){
             $writer->startElement("sitemap");
             $writer->startElement("loc");
             $writer->text(WP_HOME . '/sitemap'.$i.'.xml');
