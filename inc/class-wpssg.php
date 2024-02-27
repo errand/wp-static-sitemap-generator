@@ -111,7 +111,9 @@ class WPSSG {
             $writer->endElement();
         }
 
+        $writer->endElement();
         $writer->endDocument();
+
         $writer->flush();
     }
 
