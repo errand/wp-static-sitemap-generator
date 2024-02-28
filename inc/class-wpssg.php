@@ -103,7 +103,7 @@ class WPSSG {
         for($i = 1; $i < 3; $i++){
             $writer->startElement("sitemap");
             $writer->startElement("loc");
-            $writer->text(get_site_url() . '/sitemap'.$i.'.xml');
+            $writer->text(get_site_url() . '/xml-sitemap/sitemap'.$i.'.xml');
             $writer->endElement();
             $writer->startElement("lastmod");
             $writer->text(date('c'));
