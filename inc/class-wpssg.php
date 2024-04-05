@@ -9,17 +9,16 @@ class WPSSG {
     public function __construct($index_filename)
     {
         $this->iterator = 0;
-
         $this->index_filename = $index_filename;
+        $this->posts_count = $this->count_posts();
     }
 
     public function generate()
     {
         $offset = 0;
-        $posts_count = $this->count_posts();
         $increment = 1000;
 
-        for($i = 1; $i <= ceil($posts_count / $increment); $i++) {
+        for($i = 1; $i <= ceil($this->posts_count / $increment); $i++) {
             $this->writeUrlset($increment, $offset, $i);
             $offset += $increment;
         }
@@ -42,7 +41,7 @@ class WPSSG {
 
         $qry = get_posts($args);
 
-        $filename = ABSPATH .'/xml-sitemap/sitemap'.$iterator.'.xml';
+        $filename = __DIR__ .'/sitemap'.$iterator.'.xml';
         $writer = new XMLWriter();
         $writer->openURI($filename);
         $writer->startDocument("1.0");
@@ -60,7 +59,7 @@ class WPSSG {
         foreach ($qry as $id) {
             $writer->startElement('url');
             $writer->startElement("loc");
-            $writer->text(get_permalink($id));
+            $writer->text('http://glasnarod.ru/?p='.$id);
             $writer->endElement();
             $writer->startElement("lastmod");
             $writer->text(get_the_date('c', $id));
@@ -83,7 +82,7 @@ class WPSSG {
 
     private function writeSourse()
     {
-        $filename = ABSPATH .'static-sitemap.xml';
+        $filename = __DIR__ .'static-sitemap.xml';
         $writer = new XMLWriter();
         $writer->openURI($filename);
 

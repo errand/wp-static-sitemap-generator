@@ -93,14 +93,14 @@ function wp_static_sitemap_generator_loaded(){
 /**
  * Add Cron task
  */
-/*if ( ! wp_next_scheduled( 'wpssg_cron_hook' ) ) {
+if ( ! wp_next_scheduled( 'wpssg_cron_hook' ) ) {
     wp_schedule_event( time(), 'daily', 'wpssg_cron_hook' );
 }
 
 add_action( 'wpssg_cron_hook', 'wpssg_cron_exec' );
 function wpssg_cron_exec() {
     wpssg_generator_run();
-}*/
+}
 
 if ( class_exists( 'WP_CLI' ) ) {
     WP_CLI::add_command('wpssg_generate', 'wpssg_generator_run');
